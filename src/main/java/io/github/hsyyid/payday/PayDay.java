@@ -20,7 +20,6 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.service.economy.account.UniqueAccount;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.option.OptionSubject;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -29,7 +28,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-@Plugin(id = "io.github.hsyyid.payday", name = "PayDay", version = "0.5")
+@Plugin(id = "payday", name = "PayDay", version = "0.6", description = "Pay your players as they play.")
 public class PayDay
 {
 	public static ConfigurationNode config;
@@ -76,32 +75,23 @@ public class PayDay
 
 		Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
-		taskBuilder.execute(new Runnable()
+		taskBuilder.execute(task ->
 		{
-			public void run()
-			{
-				for (Player player : Sponge.getServer().getOnlinePlayers())
-				{
-					Subject subject = player.getContainingCollection().get(player.getIdentifier());
+			for (Player player : Sponge.getServer().getOnlinePlayers()) {
+				Subject subject = player.getContainingCollection().get(player.getIdentifier());
 
-					if (subject instanceof OptionSubject)
-					{
-						OptionSubject optionSubject = (OptionSubject) subject;
-
-						if (optionSubject.getOption("pay").isPresent())
-						{
-							BigDecimal pay = new BigDecimal(Double.parseDouble(optionSubject.getOption("pay").get()));
-							player.sendMessage(Text.of(TextColors.GOLD, "[PayDay]: ", TextColors.GRAY, "It's PayDay! Here is your salary of " + pay + " dollars! Enjoy!"));
-							UniqueAccount uniqueAccount = economyService.getOrCreateAccount(player.getUniqueId()).get();
-							uniqueAccount.deposit(economyService.getDefaultCurrency(), pay, Cause.of(NamedCause.owner(this)));
-						}
-					}
+				if (subject.getOption("pay").isPresent()) {
+					BigDecimal pay = new BigDecimal(Double.parseDouble(subject.getOption("pay").get()));
+					player.sendMessage(Text.of(TextColors.GOLD, "[PayDay]: ", TextColors.GRAY, "It's PayDay! Here is your salary of " + pay + " dollars! Enjoy!"));
+					UniqueAccount uniqueAccount = economyService.getOrCreateAccount(player.getUniqueId()).get();
+					uniqueAccount.deposit(economyService.getDefaultCurrency(), pay, Cause.of(NamedCause.owner(this)));
 				}
 			}
-		}).interval(1, Utils.getTimeUnit()).name("PayDay - Pay").submit(Sponge.getPluginManager().getPlugin("io.github.hsyyid.payday").get().getInstance().get());
+		}).interval(Utils.getTimeAmount(), Utils.getTimeUnit()).name("PayDay - Pay").submit(this);
 
 		getLogger().info("-----------------------------");
 		getLogger().info("PayDay was made by HassanS6000!");
+        getLogger().info("Patched to APIv5 by Kostronor from the Minecolonies team!");
 		getLogger().info("Please post all errors on the Sponge Thread or on GitHub!");
 		getLogger().info("Have fun, and enjoy! :D");
 		getLogger().info("-----------------------------");
@@ -129,19 +119,12 @@ public class PayDay
 		Player player = event.getTargetEntity();
 
 		Subject subject = player.getContainingCollection().get(player.getIdentifier());
-
-		if (subject instanceof OptionSubject)
-		{
-			OptionSubject optionSubject = (OptionSubject) subject;
-
-			if (optionSubject.getOption("startingbalance").isPresent())
-			{
-				BigDecimal pay = new BigDecimal(Double.parseDouble(optionSubject.getOption("startingbalance").get()));
+			if (subject.getOption("startingbalance").isPresent()) {
+				BigDecimal pay = new BigDecimal(Double.parseDouble(subject.getOption("startingbalance").get()));
 				player.sendMessage(Text.of(TextColors.GOLD, "[PayDay]: ", TextColors.GRAY, "Welcome to the server! Here is " + pay + " dollars! Enjoy!"));
 				UniqueAccount uniqueAccount = economyService.getOrCreateAccount(player.getUniqueId()).get();
 				uniqueAccount.deposit(economyService.getDefaultCurrency(), pay, Cause.of(NamedCause.owner(this)));
 			}
-		}
 	}
 
 	public static ConfigurationLoader<CommentedConfigurationNode> getConfigManager()
