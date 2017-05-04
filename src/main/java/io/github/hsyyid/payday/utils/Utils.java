@@ -77,6 +77,27 @@ public class Utils
         }
     }
 
+    public static boolean getJoinPay()
+    {
+        ConfigurationNode valueNode = PayDay.config.getNode((Object[]) ("payonjoin").split("\\."));
+
+        try {
+            String value = valueNode.getString();
+            if(value == null)
+            {
+                Utils.setConfig("payonjoin", Boolean.toString(true));
+                return true;
+            }
+            else {
+                return Boolean.getBoolean(value);
+            }
+        } catch (RuntimeException e)
+        {
+            Utils.setConfig("payonjoin", Boolean.toString(true));
+            return true;
+        }
+    }
+
     public static Map<String, BigDecimal> getPaymentAmounts()
     {
         Map<String, BigDecimal> payments = new HashMap<>();

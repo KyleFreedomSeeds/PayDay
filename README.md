@@ -6,6 +6,7 @@ A configuration file (`payday.conf`) is located in the Sponge configuration dire
 
 ```
 timeamount="1"
+payonjoin="true"
 timeunit=Hours
 payamounts={
     "players"= {

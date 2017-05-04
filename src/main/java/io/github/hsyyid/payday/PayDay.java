@@ -28,7 +28,7 @@ import java.math.BigDecimal;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-@Plugin(id = "payday", name = "PayDay", version = "1.0.0", description = "Pay your players as they play.")
+@Plugin(id = "payday", name = "PayDay", version = "1.1.0", description = "Pay your players as they play.")
 public class PayDay
 {
 
@@ -36,6 +36,8 @@ public class PayDay
     public static ConfigurationLoader<CommentedConfigurationNode> configurationManager;
     public static EconomyService economyService;
     private static PayDay instance;
+    private Task task;
+    private boolean functional = false;
 
     @Inject private Logger logger;
 
@@ -72,7 +74,7 @@ public class PayDay
 
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
-        taskBuilder.execute(task ->
+        task = taskBuilder.execute(task ->
         {
             for (Player player : Sponge.getServer().getOnlinePlayers()) {
                 for (Entry<String, BigDecimal> entry : Utils.getPaymentAmounts().entrySet())
@@ -112,16 +114,21 @@ public class PayDay
         if (econService.isPresent())
         {
             economyService = econService.get();
+            functional = true;
         }
         else
         {
             getLogger().error("Error! There is no Economy plugin found on this server, PayDay will not work correctly!");
+            task.cancel();
+            functional = false;
         }
     }
 
     @Listener
     public void onPlayerJoin(ClientConnectionEvent.Join event)
     {
+        if (!Utils.getJoinPay() || !functional)
+            return;
         Player player = event.getTargetEntity();
 
         for (Entry<String, BigDecimal> entry : Utils.getPaymentAmounts().entrySet())
