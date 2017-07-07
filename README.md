@@ -7,6 +7,7 @@ A configuration file (`payday.conf`) is located in the Sponge configuration dire
 ```
 timeamount="1"
 payonjoin="true"
+enableafkpay="true"
 timeunit=Hours
 payamounts={
     "players"= {
@@ -42,6 +43,10 @@ payamounts={
 ```
 
 If the permission is set to `*`, it will pay all players.
+
+## Integration
+
+If the `enableafkpay` is set to false in the configuration file, and the Nucleus AFK Module is enabled, PayDay will check if the player is AFK before paying them. If the player is found to be AFK, the player will not receive any currency.
 
 ---
 
