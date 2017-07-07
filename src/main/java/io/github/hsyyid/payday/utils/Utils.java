@@ -83,7 +83,7 @@ public class Utils
 
         try {
             String value = valueNode.getString();
-            if(value == null)
+            if (value == null)
             {
                 Utils.setConfig("payonjoin", Boolean.toString(true));
                 return true;
@@ -94,6 +94,27 @@ public class Utils
         } catch (RuntimeException e)
         {
             Utils.setConfig("payonjoin", Boolean.toString(true));
+            return true;
+        }
+    }
+
+    public static boolean enableAfkPay()
+    {
+        ConfigurationNode valueNode = PayDay.config.getNode((Object[]) ("enableafkpay").split("\\."));
+
+        try {
+            Boolean value = valueNode.getBoolean();
+            if (value == null)
+            {
+                Utils.setConfig("enableafkpay", Boolean.toString(true));
+                return true;
+            }
+            else {
+                return value;
+            }
+        } catch (RuntimeException e)
+        {
+            Utils.setConfig("enableafkpay", Boolean.toString(true));
             return true;
         }
     }

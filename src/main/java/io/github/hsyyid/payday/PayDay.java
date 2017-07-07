@@ -1,7 +1,10 @@
 package io.github.hsyyid.payday;
 
+import org.spongepowered.api.event.service.ChangeServiceProviderEvent;
+
 import com.google.inject.Inject;
 import io.github.hsyyid.payday.utils.Utils;
+import io.github.nucleuspowered.nucleus.api.service.NucleusAFKService;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -15,6 +18,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
+import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.economy.EconomyService;
@@ -28,7 +32,8 @@ import java.math.BigDecimal;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-@Plugin(id = "payday", name = "PayDay", version = "1.1.0", description = "Pay your players as they play.")
+@Plugin(id = "payday", name = "PayDay", version = "1.2.0", description = "Pay your players as they play.", dependencies = {@Dependency(
+        id = "nucleus", optional = true)})
 public class PayDay
 {
 
@@ -38,6 +43,7 @@ public class PayDay
     private static PayDay instance;
     private Task task;
     private boolean functional = false;
+    private Optional<NucleusAFKService> afkService = Optional.empty();
 
     @Inject private Logger logger;
 
@@ -77,6 +83,9 @@ public class PayDay
         task = taskBuilder.execute(task ->
         {
             for (Player player : Sponge.getServer().getOnlinePlayers()) {
+                // Check if the player is afk
+                if (!Utils.enableAfkPay() && afkService.isPresent() && afkService.get().isAFK(player))
+                    continue;
                 for (Entry<String, BigDecimal> entry : Utils.getPaymentAmounts().entrySet())
                 {
                     if (entry.getKey().equals("*") || player.hasPermission(entry.getKey()))
@@ -104,6 +113,16 @@ public class PayDay
         getLogger().info("Have fun, and enjoy! :D");
         getLogger().info("-----------------------------");
         getLogger().info("PayDay loaded!");
+    }
+
+    @Listener
+    public void onChangeServiceProvider(ChangeServiceProviderEvent event) {
+        if (event.getService().equals(NucleusAFKService.class)) {
+            Object raw = event.getNewProviderRegistration().getProvider();
+            if (raw instanceof NucleusAFKService) {
+                afkService = Optional.of((NucleusAFKService) raw);
+            }
+        }
     }
 
     @Listener
