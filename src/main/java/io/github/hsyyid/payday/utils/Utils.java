@@ -103,14 +103,14 @@ public class Utils
         ConfigurationNode valueNode = PayDay.config.getNode((Object[]) ("enableafkpay").split("\\."));
 
         try {
-            Boolean value = valueNode.getBoolean();
+            String value = valueNode.getString();
             if (value == null)
             {
                 Utils.setConfig("enableafkpay", Boolean.toString(true));
                 return true;
             }
             else {
-                return value;
+                return Boolean.getBoolean(value);
             }
         } catch (RuntimeException e)
         {

@@ -32,7 +32,7 @@ import java.math.BigDecimal;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-@Plugin(id = "payday", name = "PayDay", version = "1.2.0", description = "Pay your players as they play.", dependencies = {@Dependency(
+@Plugin(id = "payday", name = "PayDay", version = "1.2.1", description = "Pay your players as they play.", dependencies = {@Dependency(
         id = "nucleus", optional = true)})
 public class PayDay
 {
@@ -78,6 +78,10 @@ public class PayDay
             getLogger().error("The default configuration could not be loaded or created!");
         }
 
+        // Setup other config options
+        Utils.getJoinPay();
+        Utils.enableAfkPay();
+
         Task.Builder taskBuilder = Sponge.getScheduler().createTaskBuilder();
 
         task = taskBuilder.execute(task ->
@@ -117,10 +121,12 @@ public class PayDay
 
     @Listener
     public void onChangeServiceProvider(ChangeServiceProviderEvent event) {
-        if (event.getService().equals(NucleusAFKService.class)) {
-            Object raw = event.getNewProviderRegistration().getProvider();
-            if (raw instanceof NucleusAFKService) {
-                afkService = Optional.of((NucleusAFKService) raw);
+        if (Sponge.getPluginManager().getPlugin("nucleus").isPresent()) {
+            if (event.getService().equals(NucleusAFKService.class)) {
+                Object raw = event.getNewProviderRegistration().getProvider();
+                if (raw instanceof NucleusAFKService) {
+                    afkService = Optional.of((NucleusAFKService) raw);
+                }
             }
         }
     }
