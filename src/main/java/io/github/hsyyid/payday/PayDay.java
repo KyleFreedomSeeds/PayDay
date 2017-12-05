@@ -1,7 +1,5 @@
 package io.github.hsyyid.payday;
 
-import org.spongepowered.api.event.service.ChangeServiceProviderEvent;
-
 import com.google.inject.Inject;
 import io.github.hsyyid.payday.utils.Utils;
 import io.github.nucleuspowered.nucleus.api.service.NucleusAFKService;
@@ -14,12 +12,14 @@ import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
+import org.spongepowered.api.event.service.ChangeServiceProviderEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.service.economy.account.UniqueAccount;
@@ -32,7 +32,7 @@ import java.math.BigDecimal;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-@Plugin(id = "payday", name = "PayDay", version = "1.2.1", description = "Pay your players as they play.", dependencies = {@Dependency(
+@Plugin(id = "payday", name = "PayDay", version = "1.3.0", description = "Pay your players as they play.", dependencies = {@Dependency(
         id = "nucleus", optional = true)})
 public class PayDay
 {
@@ -46,6 +46,8 @@ public class PayDay
     private Optional<NucleusAFKService> afkService = Optional.empty();
 
     @Inject private Logger logger;
+
+    @Inject private PluginContainer container;
 
     public Logger getLogger()
     {
@@ -103,7 +105,7 @@ public class PayDay
                         player.sendMessage(Text.of(TextColors.GOLD, "[PayDay]: ", TextColors.GRAY, "It's PayDay! Here is your salary of "
                                 + pay + " " + name + "! Enjoy!"));
                         UniqueAccount uniqueAccount = economyService.getOrCreateAccount(player.getUniqueId()).get();
-                        uniqueAccount.deposit(economyService.getDefaultCurrency(), pay, Cause.of(NamedCause.owner(this)));
+                        uniqueAccount.deposit(economyService.getDefaultCurrency(), pay, Cause.of(EventContext.empty(), container));
                     }
                 }
             }
@@ -169,7 +171,7 @@ public class PayDay
                 player.sendMessage(Text.of(TextColors.GOLD, "[PayDay]: ", TextColors.GRAY, "Welcome to the server! Here is " + pay + " " + name
                         + "! Enjoy!"));
                 UniqueAccount uniqueAccount = economyService.getOrCreateAccount(player.getUniqueId()).get();
-                uniqueAccount.deposit(economyService.getDefaultCurrency(), pay, Cause.of(NamedCause.owner(this)));
+                uniqueAccount.deposit(economyService.getDefaultCurrency(), pay, Cause.of(EventContext.empty(), container));
             }
         }
     }
