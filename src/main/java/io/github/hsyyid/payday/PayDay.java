@@ -23,8 +23,6 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.service.economy.account.UniqueAccount;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,10 +30,9 @@ import java.math.BigDecimal;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-@Plugin(id = "payday", name = "PayDay", version = "1.3.0", description = "Pay your players as they play.", dependencies = {@Dependency(
+@Plugin(id = "payday", name = "PayDay", version = "1.4.0", description = "Pay your players as they play.", dependencies = {@Dependency(
         id = "nucleus", optional = true)})
-public class PayDay
-{
+public class PayDay {
 
     public static ConfigurationNode config;
     public static ConfigurationLoader<CommentedConfigurationNode> configurationManager;
@@ -49,8 +46,7 @@ public class PayDay
 
     @Inject private PluginContainer container;
 
-    public Logger getLogger()
-    {
+    public Logger getLogger() {
         return logger;
     }
 
@@ -59,15 +55,12 @@ public class PayDay
     @Inject @DefaultConfig(sharedRoot = true) private ConfigurationLoader<CommentedConfigurationNode> confManager;
 
     @Listener
-    public void onGameInit(GameInitializationEvent event)
-    {
+    public void onGameInit(GameInitializationEvent event) {
         instance = this;
         getLogger().info("PayDay loading...");
 
-        try
-        {
-            if (!dConfig.exists())
-            {
+        try {
+            if (!dConfig.exists()) {
                 dConfig.createNewFile();
                 config = confManager.load();
                 confManager.save(config);
@@ -75,8 +68,7 @@ public class PayDay
 
             configurationManager = confManager;
             config = confManager.load();
-        } catch (IOException exception)
-        {
+        } catch (IOException exception) {
             getLogger().error("The default configuration could not be loaded or created!");
         }
 
@@ -90,20 +82,13 @@ public class PayDay
         {
             for (Player player : Sponge.getServer().getOnlinePlayers()) {
                 // Check if the player is afk
-                if (!Utils.enableAfkPay() && afkService.isPresent() && afkService.get().isAFK(player))
+                if (!Utils.enableAfkPay() && afkService.isPresent() && afkService.get().isAFK(player)) {
                     continue;
-                for (Entry<String, BigDecimal> entry : Utils.getPaymentAmounts().entrySet())
-                {
-                    if (entry.getKey().equals("*") || player.hasPermission(entry.getKey()))
-                    {
+                }
+                for (Entry<String, BigDecimal> entry : Utils.getPaymentAmounts().entrySet()) {
+                    if (entry.getKey().equals("*") || player.hasPermission(entry.getKey())) {
                         BigDecimal pay = entry.getValue();
-                        String name = economyService.getDefaultCurrency().getDisplayName().toPlain();
-                        if (pay.compareTo(BigDecimal.ONE) != 0)
-                        {
-                            name = economyService.getDefaultCurrency().getPluralDisplayName().toPlain();
-                        }
-                        player.sendMessage(Text.of(TextColors.GOLD, "[PayDay]: ", TextColors.GRAY, "It's PayDay! Here is your salary of "
-                                + pay + " " + name + "! Enjoy!"));
+                        player.sendMessage(Utils.getSalaryMessage(pay));
                         UniqueAccount uniqueAccount = economyService.getOrCreateAccount(player.getUniqueId()).get();
                         uniqueAccount.deposit(economyService.getDefaultCurrency(), pay, Cause.of(EventContext.empty(), container));
                     }
@@ -134,17 +119,18 @@ public class PayDay
     }
 
     @Listener
-    public void onGamePostInit(GamePostInitializationEvent event)
-    {
+    public void onGamePostInit(GamePostInitializationEvent event) {
         Optional<EconomyService> econService = Sponge.getServiceManager().provide(EconomyService.class);
 
-        if (econService.isPresent())
-        {
+        if (econService.isPresent()) {
             economyService = econService.get();
             functional = true;
-        }
-        else
-        {
+
+            // Setup messages
+            getLogger().info("Initializing messages config!");
+            Utils.getFirstJoinMessage(BigDecimal.ONE);
+            Utils.getSalaryMessage(BigDecimal.ONE);
+        } else {
             getLogger().error("Error! There is no Economy plugin found on this server, PayDay will not work correctly!");
             task.cancel();
             functional = false;
@@ -152,37 +138,27 @@ public class PayDay
     }
 
     @Listener
-    public void onPlayerJoin(ClientConnectionEvent.Join event)
-    {
-        if (!Utils.getJoinPay() || !functional)
+    public void onPlayerJoin(ClientConnectionEvent.Join event) {
+        if (!Utils.getJoinPay() || !functional) {
             return;
+        }
         Player player = event.getTargetEntity();
 
-        for (Entry<String, BigDecimal> entry : Utils.getPaymentAmounts().entrySet())
-        {
-            if (entry.getKey().equals("*") || player.hasPermission(entry.getKey()))
-            {
+        for (Entry<String, BigDecimal> entry : Utils.getPaymentAmounts().entrySet()) {
+            if (entry.getKey().equals("*") || player.hasPermission(entry.getKey())) {
                 BigDecimal pay = entry.getValue();
-                String name = economyService.getDefaultCurrency().getDisplayName().toPlain();
-                if (pay.compareTo(BigDecimal.ONE) != 0)
-                {
-                    name = economyService.getDefaultCurrency().getPluralDisplayName().toPlain();
-                }
-                player.sendMessage(Text.of(TextColors.GOLD, "[PayDay]: ", TextColors.GRAY, "Welcome to the server! Here is " + pay + " " + name
-                        + "! Enjoy!"));
+                player.sendMessage(Utils.getFirstJoinMessage(pay));
                 UniqueAccount uniqueAccount = economyService.getOrCreateAccount(player.getUniqueId()).get();
                 uniqueAccount.deposit(economyService.getDefaultCurrency(), pay, Cause.of(EventContext.empty(), container));
             }
         }
     }
 
-    public static PayDay getInstance()
-    {
+    public static PayDay getInstance() {
         return instance;
     }
 
-    public static ConfigurationLoader<CommentedConfigurationNode> getConfigManager()
-    {
+    public static ConfigurationLoader<CommentedConfigurationNode> getConfigManager() {
         return configurationManager;
     }
 }

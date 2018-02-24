@@ -15,6 +15,8 @@ payamounts={
         "amount"= 50.0
     }
 }
+salarymessage="&6[PayDay]: &7It's PayDay! Here is your salary of {amount} {label}! Enjoy!"
+joinmessage="&6[PayDay]: &7Welcome to the server! Here is {amount} {label}! Enjoy!"
 ```
 
 Valid time units are:
@@ -49,7 +51,5 @@ If the permission is set to `*`, it will pay all players.
 If the `enableafkpay` is set to false in the configuration file, and the Nucleus AFK Module is enabled, PayDay will check if the player is AFK before paying them. If the player is found to be AFK, the player will not receive any currency.
 
 ---
-
-## Credit
 
 PayDay was originally created by HassanS6000 of [NEGAFINITY](http://negafinity.com).
