@@ -2,7 +2,7 @@ package io.github.hsyyid.payday;
 
 import com.google.inject.Inject;
 import io.github.hsyyid.payday.utils.Utils;
-import io.github.nucleuspowered.nucleus.api.service.NucleusAFKService;
+import io.github.nucleuspowered.nucleus.api.module.afk.NucleusAFKService;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -15,6 +15,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
+import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.event.service.ChangeServiceProviderEvent;
 import org.spongepowered.api.plugin.Dependency;
@@ -100,6 +101,7 @@ public class PayDay {
         getLogger().info("PayDay was made by HassanS6000!");
         getLogger().info("Patched to APIv5 by Kostronor from the Minecolonies team!");
         getLogger().info("Further updated by Flibio!");
+        getLogger().info("Updated to Nucleus 2.* by KyleFS!");
         getLogger().info("Please post all errors on the Sponge Thread or on GitHub!");
         getLogger().info("Have fun, and enjoy! :D");
         getLogger().info("-----------------------------");
