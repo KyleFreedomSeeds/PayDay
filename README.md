@@ -53,3 +53,5 @@ If the `enableafkpay` is set to false in the configuration file, and the Nucleus
 ---
 
 PayDay was originally created by HassanS6000 of [NEGAFINITY](http://negafinity.com).
+
+Updated to Nucleus API 2.1.0 by KyleFS
